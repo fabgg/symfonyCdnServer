@@ -23,3 +23,6 @@ parameters:
     jukebox: "media"
     thumb_height: 150
     thumb_width: 150
+    # on mac os should be /usr/local/bin/ffmpeg &&  /usr/local/bin/ffprobe
+    ffmpeg_path: /usr/bin/ffmpeg
+    ffprobe_path: /usr/bin/ffprobe
