@@ -1,0 +1,13 @@
+services:
+    app.service.document:
+        class: AppBundle\Services\DocumentService
+        arguments: [ "@service_container",  "@doctrine.orm.entity_manager",  '@request_stack']
+
+    app.service.auth:
+        class: AppBundle\Services\AuthService
+        arguments: [ "@service_container",  '@request_stack']
+
+    app.command.get_secret:
+        class: AppBundle\Command\GetSecretCommand
+        tags:
+            -  { name: console.command }

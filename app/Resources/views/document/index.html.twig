@@ -1,0 +1,55 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h1>Documents list</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Createdat</th>
+                <th>Updatedat</th>
+                <th>Filename</th>
+                <th>Fileextension</th>
+                <th>Filemime</th>
+                <th>Filesize</th>
+                <th>Filepath</th>
+                <th>Fileslug</th>
+                <th>Filethumb</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for document in documents %}
+            <tr>
+                <td><a href="{{ path('document_show', { 'id': document.id }) }}">{{ document.id }}</a></td>
+                <td>{% if document.createdAt %}{{ document.createdAt|date('Y-m-d H:i:s') }}{% endif %}</td>
+                <td>{% if document.updatedAt %}{{ document.updatedAt|date('Y-m-d H:i:s') }}{% endif %}</td>
+                <td>{{ document.fileName }}</td>
+                <td>{{ document.fileExtension }}</td>
+                <td>{{ document.fileMime }}</td>
+                <td>{{ document.fileSize }}</td>
+                <td>{% if document.filePath %}{{ document.filePath|join(', ') }}{% endif %}</td>
+                <td>{{ document.fileSlug }}</td>
+                <td>{{ document.fileThumb }}</td>
+                <td>
+                    <ul>
+                        <li>
+                            <a href="{{ path('document_show', { 'id': document.id }) }}">show</a>
+                        </li>
+                        <li>
+                            <a href="{{ path('document_edit', { 'id': document.id }) }}">edit</a>
+                        </li>
+                    </ul>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <ul>
+        <li>
+            <a href="{{ path('document_new') }}">Create a new document</a>
+        </li>
+    </ul>
+{% endblock %}

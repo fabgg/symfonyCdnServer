@@ -1,0 +1,64 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h1>Document</h1>
+
+    <table>
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ document.id }}</td>
+            </tr>
+            <tr>
+                <th>Createdat</th>
+                <td>{% if document.createdAt %}{{ document.createdAt|date('Y-m-d H:i:s') }}{% endif %}</td>
+            </tr>
+            <tr>
+                <th>Updatedat</th>
+                <td>{% if document.updatedAt %}{{ document.updatedAt|date('Y-m-d H:i:s') }}{% endif %}</td>
+            </tr>
+            <tr>
+                <th>Filename</th>
+                <td>{{ document.fileName }}</td>
+            </tr>
+            <tr>
+                <th>Fileextension</th>
+                <td>{{ document.fileExtension }}</td>
+            </tr>
+            <tr>
+                <th>Filemime</th>
+                <td>{{ document.fileMime }}</td>
+            </tr>
+            <tr>
+                <th>Filesize</th>
+                <td>{{ document.fileSize }}</td>
+            </tr>
+            <tr>
+                <th>Filepath</th>
+                <td>{% if document.filePath %}{{ document.filePath|join(', ') }}{% endif %}</td>
+            </tr>
+            <tr>
+                <th>Fileslug</th>
+                <td>{{ document.fileSlug }}</td>
+            </tr>
+            <tr>
+                <th>Filethumb</th>
+                <td>{{ document.fileThumb }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <ul>
+        <li>
+            <a href="{{ path('document_index') }}">Back to the list</a>
+        </li>
+        <li>
+            <a href="{{ path('document_edit', { 'id': document.id }) }}">Edit</a>
+        </li>
+        <li>
+            {{ form_start(delete_form) }}
+                <input type="submit" value="Delete">
+            {{ form_end(delete_form) }}
+        </li>
+    </ul>
+{% endblock %}

@@ -1,0 +1,3 @@
+parameters:
+    tmp_directory: "%kernel.project_dir%/var/tmp/"
+    jukebox_directory: "%kernel.project_dir%/web/%jukebox%/"
