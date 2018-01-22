@@ -72,7 +72,7 @@ class DocumentService
         return array('result'=>'document deleted');
     }
 
-    private function getResponse(Document $document){
+    public function getResponse(Document $document){
         $response = array(
             'id'    => $document->getId(),
             'mime'  => $document->getFileMime(),
