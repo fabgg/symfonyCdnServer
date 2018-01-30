@@ -123,6 +123,13 @@ class ApiController extends Controller
     public function postMakeThumbAction(Request $request){
         $authService = $this->get('app.service.auth');
         if(!$authService->validate()) throw new AccessDeniedException();
+        $response = new JsonResponse();
+        if(!$request->get('id')) $response->setData(array('error'=>'id parameter is missing'));
+
+        $document = $this->getDoctrine()->getManager()->getRepository('AppBundle:Document')->find($request->get('id'));
+        if(!$document) throw  new NotFoundHttpException("can't find this file");
+        $docServices = $this->get('app.service.document');
+        return $response->setData($docServices->makeThumb($document));
     }
 
 }
