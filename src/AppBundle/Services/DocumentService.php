@@ -205,14 +205,14 @@ class DocumentService
         $image = $imagine->open($resource);
         if($document->getFileExtension() ==='gif' || $document->getFileType()==='video' ){
             $ratio = $image->getSize()->getWidth()/$image->getSize()->getHeight();
-            $thumb_ratio = $this->thumb_width / $this->thumb_height;
-            if($ratio>=$thumb_ratio) $this->thumb_height = round($this->thumb_height/$ratio);
-            else $this->thumb_width = round($this->thumb_width/$ratio);
-            $box = new Box($this->thumb_width,$this->thumb_height);
+            $thumb_ratio = $width / $height;
+            if($ratio>=$thumb_ratio) $height = round($height/$ratio);
+            else $width = round($$width/$ratio);
+            $box = new Box($width,$height);
             $image->resize($box)->save($finalPath.$thumbName, array('flatten' => false));
         }
         else {
-            $box = new Box($this->thumb_width,$this->thumb_height);
+            $box = new Box($width,$height);
             $image->thumbnail($box)->save($finalPath.$thumbName);
         }
 
