@@ -15,7 +15,7 @@ use Imagine\Image\Box;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\HttpFoundation\RequestStack;
-use Imagine\Imagick\Imagine;
+use Imagine\Gd\Imagine;
 
 class DocumentService
 {
@@ -53,8 +53,8 @@ class DocumentService
     }
 
     public function saveDocument(Document $document, $process = false){
-        $this->setDimensions($document);
         $this->moveToJukebox($document);
+        $this->setDimensions($document);
         if($process) $this->generateThumb($document);
         $this->em->persist($document);
         $this->em->flush();
@@ -252,19 +252,19 @@ class DocumentService
     private function setDimensions(Document $document){
         $finalPath = $this->getAbsolutePath($document);
         if($document->getFileType() === 'video'){
-            $ffprobe = \FFMpeg\FFProbe::create();
+            $ffprobe = \FFMpeg\FFProbe::create(array('ffprobe.binaries' => $this->ffprobe_path));
             $video_dimensions = $ffprobe->streams( $finalPath.$document->getFileName() )->videos()->first()->getDimensions();
             if($video_dimensions){
-                $document->setHeight($video_dimensions->getHeight());
-                $document->setWidth($video_dimensions->getWidth());
+                $document->setHeight(intval($video_dimensions->getHeight()));
+                $document->setWidth(intval($video_dimensions->getWidth()));
             }
         }
         else if($document->getFileType() === 'image'){
-            $imagine = new Imagine();
+            $imagine = new  Imagine();
             $image = $imagine->open($finalPath.$document->getFileName());
             if($image){
-                $document->setHeight($image->getSize()->getHeight());
-                $document->setWidth($image->getSize()->getWidth());
+                $document->setHeight(intval($image->getSize()->getHeight()));
+                $document->setWidth(intval($image->getSize()->getWidth()));
             }
         }
         return $document;
