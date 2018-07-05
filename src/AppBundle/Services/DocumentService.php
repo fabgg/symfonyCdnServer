@@ -53,6 +53,7 @@ class DocumentService
     }
 
     public function saveDocument(Document $document, $process = false){
+        $this->setDimensions($document);
         $this->moveToJukebox($document);
         if($process) $this->generateThumb($document);
         $this->em->persist($document);
@@ -79,11 +80,14 @@ class DocumentService
 
     public function getResponse(Document $document){
         $response = array(
-            'id'    => $document->getId(),
-            'mime'  => $document->getFileMime(),
-            'type'  => $document->getFileType(),
-            'url'   => $this->getWebUri($document)
+            'id'        => $document->getId(),
+            'mime'      => $document->getFileMime(),
+            'type'      => $document->getFileType(),
+            'url'       => $this->getWebUri($document),
+            'width'     => $document->getWidth(),
+            'height'    => $document->getHeight()
         );
+
         if($document->getFileThumb()) $response['thumb'] =  $this->getWebUri($document,true);
         if($document->getFilePreview()) $response['preview'] =  $this->getWebUri($document,false,true);
 
@@ -243,6 +247,27 @@ class DocumentService
             ->gif(\FFMpeg\Coordinate\TimeCode::fromSeconds(2), new \FFMpeg\Coordinate\Dimension(480, 360), 2)
             ->save($finalPath.$previewName);
         $document->setFilePreview($previewName);
+    }
+
+    private function setDimensions(Document $document){
+        $finalPath = $this->getAbsolutePath($document);
+        if($document->getFileType() === 'video'){
+            $ffprobe = \FFMpeg\FFProbe::create();
+            $video_dimensions = $ffprobe->streams( $finalPath.$document->getFileName() )->videos()->first()->getDimensions();
+            if($video_dimensions){
+                $document->setHeight($video_dimensions->getHeight());
+                $document->setWidth($video_dimensions->getWidth());
+            }
+        }
+        else if($document->getFileType() === 'image'){
+            $imagine = new Imagine();
+            $image = $imagine->open($finalPath.$document->getFileName());
+            if($image){
+                $document->setHeight($image->getSize()->getHeight());
+                $document->setWidth($image->getSize()->getWidth());
+            }
+        }
+        return $document;
     }
 
 }

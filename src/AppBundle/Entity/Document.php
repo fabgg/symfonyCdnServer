@@ -92,6 +92,19 @@ class Document
      */
     private $filePreview;
 
+    /**
+     * @var int
+     *
+     * @ORM\Column(name="width", type="integer", nullable=true)
+     */
+    private $width;
+
+    /**
+     * @var int
+     *
+     * @ORM\Column(name="height", type="integer", nullable=true)
+     */
+    private $height;
 
     /**
      * @var string not stored in db jsut use one time on init
@@ -388,5 +401,53 @@ class Document
     public function getFilePreview()
     {
         return $this->filePreview;
+    }
+
+    /**
+     * Set width
+     *
+     * @param integer $width
+     *
+     * @return Document
+     */
+    public function setWidth($width)
+    {
+        $this->width = $width;
+
+        return $this;
+    }
+
+    /**
+     * Get width
+     *
+     * @return integer
+     */
+    public function getWidth()
+    {
+        return $this->width;
+    }
+
+    /**
+     * Set height
+     *
+     * @param integer $height
+     *
+     * @return Document
+     */
+    public function setHeight($height)
+    {
+        $this->height = $height;
+
+        return $this;
+    }
+
+    /**
+     * Get height
+     *
+     * @return integer
+     */
+    public function getHeight()
+    {
+        return $this->height;
     }
 }
