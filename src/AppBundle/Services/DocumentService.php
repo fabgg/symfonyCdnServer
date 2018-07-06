@@ -15,7 +15,7 @@ use Imagine\Image\Box;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\HttpFoundation\RequestStack;
-use Imagine\Gd\Imagine;
+use Imagine\Imagick\Imagine;
 
 class DocumentService
 {
