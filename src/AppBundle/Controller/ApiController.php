@@ -9,6 +9,7 @@
 namespace AppBundle\Controller;
 
 use AppBundle\Entity\Document;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -110,6 +111,8 @@ class ApiController extends Controller
         $docService = $this->get('app.service.document');
         $docService->initDocument($document);
 
+        file_put_contents ('/var/www/cdn_server/dev/var/tmp'.time().'.txt', $request->get('base64'));
+
         $base64Data = (preg_match('/data:([^;]*);base64,(.*)/', $request->get('base64'), $matches)) ? $matches[2]: $request->get('base64');
         file_put_contents ($document->getFileTmpPath().$document->getFileName(), base64_decode($base64Data));
 
@@ -130,6 +133,49 @@ class ApiController extends Controller
         if(!$document) throw  new NotFoundHttpException("can't find this file");
         $docServices = $this->get('app.service.document');
         return $response->setData($docServices->makeThumb($document));
+    }
+
+    /**
+     * @Post("/api/composition/new/background")
+     * json {source_type:id/url,source_value:string}
+     */
+    public function compositionNewBackgroundAction(Request $request){
+        $authService = $this->get('app.service.auth');
+        if(!$authService->validate()) throw new AccessDeniedException();
+        $response = new JsonResponse();
+        if(!$request->get('source_type') && !$request->get('source_value')) $response->setData(array('error'=>'source parameter is missing'));
+
+        $copy = $request->get('copy');
+        $source_value = $request->get('source_value');
+        $source_type = $request->get('source_value');
+        $docService = $this->get('app.service.document');
+
+        if($source_type == "url"){
+            $document = new Document();
+            $docService->initDocument($document);
+            $temporaryResource = fopen($document->getFileTmpPath().$document->getFileName(),'w');
+            $guzzle = new Guzzle();
+            $res = $guzzle->request('GET', $source_value, ['sink' => $temporaryResource,'http_errors' => false]);
+            if($res->getStatusCode() != 200 ){
+                return $response->setData(array('error'=>'code '.$res->getStatusCode().' for url '.$source_value));
+            }
+
+            return $response->setData($docService->saveCompositionBackgroundDocument($document));
+        }
+        elseif($source_type == "id") {
+            $document_source = $$this->getDoctrine()->getManager()->getRepository('AppBundle:Document')->find($source_value);
+            if(!($document_source instanceof Document)) throw new NotFoundHttpException('Document with id '.$source_value.' not found in db');
+            $file_source = $docService->getAbsolutePath($document_source).$document_source->getFileName();
+            if(!is_file($file_source)) throw new NotFoundHttpException('Document with id '.$source_value.' not found in filesystem');
+
+            $document = new Document();
+            $docService->initDocument($document);
+            $file_destination = $docService->getAbsolutePath($document).$document->getFileName();
+            if(copy($file_source, $file_destination))  return $response->setData($docService->saveCompositionBackgroundDocument($document));
+            else throw new NotFoundHttpException('Copy failed');
+        }
+
+        else throw new NotFoundHttpException('not understand');
     }
 
 }

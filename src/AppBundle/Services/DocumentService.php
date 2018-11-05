@@ -16,6 +16,7 @@ use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Imagine\Imagick\Imagine;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class DocumentService
 {
@@ -94,6 +95,23 @@ class DocumentService
         return $response;
     }
 
+    public function saveCompositionBackgroundDocument(Document $document){
+        $this->moveToJukebox($document);
+        $this->setDimensions($document);
+        if($document->getWidth() != 1920 || $document->getHeight() != 1080){
+            $backgroundBox = new Box(1920,1080);
+            $finalPath = $this->getAbsolutePath($document);
+            $resource = $finalPath.$document->getFileName();
+            $imagine = new Imagine();
+            $image = $imagine->open($resource);
+            $image->thumbnail($backgroundBox)->save($finalPath.$resource);
+            $this->setDimensions($document);
+        }
+        $this->em->persist($document);
+        $this->em->flush();
+        return $this->getResponse($document);
+    }
+
     private function moveToJukebox(Document $document){
         if(!$document->getFileTmpPath() && !$document->getFileName()) throw  new Exception("document are not initilized");
 
@@ -112,7 +130,10 @@ class DocumentService
         $destinationResource = $finalPath.$document->getFileName();
         rename($temporaryResource,$destinationResource);
 
-        if($document->getFileType() === 'video') $this->generatePreview($document);
+        if($document->getFileType() === 'video') {
+            $this->convertVideo($document);
+            $this->generatePreview($document);
+        }
 
     }
 
@@ -138,7 +159,7 @@ class DocumentService
         }
         if(!$extension){
             unlink($document->getFileTmpPath().$document->getFileName());
-            throw new Exception("This file can't be manage by this server");
+            throw new Exception("This file can't be manage by this server ".$document->getFileMime());
         }
         $document->setFileExtension($extension);
         $document->setFileType($type);
@@ -153,7 +174,7 @@ class DocumentService
         return $path;
     }
 
-    private function  generateRandPath()
+    private function generateRandPath()
     {
         $randPath = array();
         for ($i = 0; $i <= 4; $i++) {
@@ -268,6 +289,16 @@ class DocumentService
             }
         }
         return $document;
+    }
+
+    private function convertVideo(Document $document){
+        $finalPath = $this->getAbsolutePath($document);
+        $ffmpeg = \FFMpeg\FFMpeg::create(array(
+            'ffmpeg.binaries'  => $this->ffmpeg_path,
+            'ffprobe.binaries' => $this->ffprobe_path
+        ));
+        $video = $ffmpeg->open($finalPath.$document->getFileName());
+        $video->save(new \FFMpeg\Format\Video\X264(), 'test.mp4');
     }
 
 }
