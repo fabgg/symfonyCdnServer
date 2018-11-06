@@ -145,11 +145,10 @@ class ApiController extends Controller
         $response = new JsonResponse();
         if(!$request->get('source_type') && !$request->get('source_value')) $response->setData(array('error'=>'source parameter is missing'));
 
-        $copy = $request->get('copy');
         $source_value = $request->get('source_value');
-        $source_type = $request->get('source_value');
+        $source_type = $request->get('source_type');
         $docService = $this->get('app.service.document');
-
+        
         if($source_type == "url"){
             $document = new Document();
             $docService->initDocument($document);
