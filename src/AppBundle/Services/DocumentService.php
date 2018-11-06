@@ -178,7 +178,7 @@ class DocumentService
         $document->setFileType($type);
     }
 
-    private function getAbsolutePath(Document $document){
+    public function getAbsolutePath(Document $document){
         $path = $this->jukebox_directory;
         if(!$document->getFilePath()) $document->setFilePath($this->generateRandPath());
         foreach ($document->getFilePath() as $v) {

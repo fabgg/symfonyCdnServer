@@ -162,7 +162,7 @@ class ApiController extends Controller
             return $response->setData($docService->saveCompositionBackgroundDocument($document));
         }
         elseif($source_type == "id") {
-            $document_source = $$this->getDoctrine()->getManager()->getRepository('AppBundle:Document')->find($source_value);
+            $document_source = $this->getDoctrine()->getManager()->getRepository('AppBundle:Document')->find($source_value);
             if(!($document_source instanceof Document)) throw new NotFoundHttpException('Document with id '.$source_value.' not found in db');
             $file_source = $docService->getAbsolutePath($document_source).$document_source->getFileName();
             if(!is_file($file_source)) throw new NotFoundHttpException('Document with id '.$source_value.' not found in filesystem');
