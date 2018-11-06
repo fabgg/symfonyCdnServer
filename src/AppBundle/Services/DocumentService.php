@@ -104,7 +104,7 @@ class DocumentService
         $imagine = new Imagine();
         $image = $imagine->open($resource);
         $originalSize = $image->getSize();
-        if($originalSize->getWidth() > $backgroundBox->getWidth() &&  $originalSize->getHeight() > $backgroundBox->getHeight()){
+        if($originalSize->getWidth() >= $backgroundBox->getWidth() &&  $originalSize->getHeight() >= $backgroundBox->getHeight()){
             $originalRatio = $originalSize->getWidth() / $originalSize->getHeight();
             $destinationRatio = $backgroundBox->getWidth() / $backgroundBox->getHeight();
             if($originalRatio > $destinationRatio){
