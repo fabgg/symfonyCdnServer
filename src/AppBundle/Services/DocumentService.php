@@ -12,6 +12,7 @@ namespace AppBundle\Services;
 use AppBundle\Entity\Document;
 use Doctrine\ORM\EntityManager;
 use Imagine\Image\Box;
+use Imagine\Image\Point;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -97,16 +98,28 @@ class DocumentService
 
     public function saveCompositionBackgroundDocument(Document $document){
         $this->moveToJukebox($document);
-        $this->setDimensions($document);
-        if($document->getWidth() != 1920 || $document->getHeight() != 1080){
-            $backgroundBox = new Box(1920,1080);
-            $finalPath = $this->getAbsolutePath($document);
-            $resource = $finalPath.$document->getFileName();
-            $imagine = new Imagine();
-            $image = $imagine->open($resource);
-            $image->thumbnail($backgroundBox)->save($finalPath.$resource);
-            $this->setDimensions($document);
+        $backgroundBox = new Box(1920,1080);
+        $finalPath = $this->getAbsolutePath($document);
+        $resource = $finalPath.$document->getFileName();
+        $imagine = new Imagine();
+        $image = $imagine->open($resource);
+        $originalSize = $image->getSize();
+        if($originalSize->getWidth() > $backgroundBox->getWidth() &&  $originalSize->getHeight() > $backgroundBox->getHeight()){
+            $originalRatio = $originalSize->getWidth() / $originalSize->getHeight();
+            $destinationRatio = $backgroundBox->getWidth() / $backgroundBox->getHeight();
+            if($originalRatio > $destinationRatio){
+                $pointX = intval(($originalSize->getWidth()-($destinationRatio*$originalSize->getHeight()))/2);
+                $pointY = 0;
+            }
+            else{
+                $pointY = intval(($originalSize->getHeight()-($originalSize->getWidth()/$destinationRatio))/2);
+                $pointX = 0;
+            }
+            $pointCrop = new Point($pointX,$pointY);
+            $tmpBox = new Box(($originalSize->getWidth()-($pointX*2)),($originalSize->getHeight()-($pointY*2)));
+            $image->crop($pointCrop,$tmpBox)->resize($backgroundBox)->save($resource);
         }
+        $this->setDimensions($document);
         $this->em->persist($document);
         $this->em->flush();
         return $this->getResponse($document);
