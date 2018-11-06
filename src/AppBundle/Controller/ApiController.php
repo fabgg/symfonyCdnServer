@@ -170,7 +170,7 @@ class ApiController extends Controller
             $document = new Document();
             $docService->initDocument($document);
             $tmpPath = $document->getFileTmpPath();
-            $document->setFileName($document->getFileName().'.'.$document_source->getFileExtension());
+           // $document->setFileName($document->getFileName().'.'.$document_source->getFileExtension());
             $file_destination = $tmpPath.$document->getFileName();
             if(copy($file_source, $file_destination))  return $response->setData($docService->saveCompositionBackgroundDocument($document));
             else throw new NotFoundHttpException('Copy failed');
